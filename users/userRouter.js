@@ -51,8 +51,17 @@ router.get("/:user_id/posts", validateUserId, (req, res) => {
     });
 });
 
-router.delete("/:user_id", (req, res) => {
-  res.status(500).json({ message: "not yet implemented" });
+router.delete("/:user_id", validateUserId, (req, res) => {
+  db.remove(req.user.id)
+    .then((posts) => {
+      res.status(200).json(req.user);
+    })
+    .catch((err) => {
+      console.log(
+        `[${new Date().toISOString()}] error deleting user: ${err}`
+      );
+      res.status(500).json({ error: "Failed to delete user" });
+    });
 });
 
 router.put("/:user_id", validateUser, validateUserId, (req, res) => {
