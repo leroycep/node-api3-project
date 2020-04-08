@@ -1,6 +1,7 @@
 const express = require("express");
 
 const db = require("./userDb.js");
+const postDb = require("../posts/postDb.js");
 
 const router = express.Router();
 
@@ -17,8 +18,19 @@ router.post("/", validateUser, (req, res) => {
     });
 });
 
-router.post("/:id/posts", (req, res) => {
-  res.status(500).json({ message: "not yet implemented" });
+router.post("/:user_id/posts", validateUserId, (req, res) => {
+  const post = { text: req.body.text, user_id: req.params.user_id };
+  postDb
+    .insert(post)
+    .then((post) => {
+      res.status(201).json(post);
+    })
+    .catch((err) => {
+      console.log(
+        `[${new Date().toISOString()}] error adding new post: ${err}`
+      );
+      res.status(500).json({ message: "Failed to add new post" });
+    });
 });
 
 router.get("/", (req, res) => {
@@ -57,9 +69,7 @@ router.delete("/:user_id", validateUserId, (req, res) => {
       res.status(200).json(req.user);
     })
     .catch((err) => {
-      console.log(
-        `[${new Date().toISOString()}] error deleting user: ${err}`
-      );
+      console.log(`[${new Date().toISOString()}] error deleting user: ${err}`);
       res.status(500).json({ error: "Failed to delete user" });
     });
 });
@@ -123,7 +133,15 @@ function validateUser(req, res, next) {
 }
 
 function validatePost(req, res, next) {
-  // do your magic!
+  if (req.body) {
+    if (req.body.text) {
+      next();
+    } else {
+      res.status(400).json({ error: "missing required field: 'text'" });
+    }
+  } else {
+    res.status(400).json({ error: "missing post data" });
+  }
 }
 
 module.exports = router;
