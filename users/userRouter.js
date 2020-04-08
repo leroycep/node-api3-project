@@ -38,8 +38,17 @@ router.get("/:user_id", validateUserId, (req, res) => {
   res.status(200).json(req.user);
 });
 
-router.get("/:user_id/posts", (req, res) => {
-  res.status(500).json({ message: "not yet implemented" });
+router.get("/:user_id/posts", validateUserId, (req, res) => {
+  db.getUserPosts(req.user.id)
+    .then((posts) => {
+      res.status(200).json(posts);
+    })
+    .catch((err) => {
+      console.log(
+        `[${new Date().toISOString()}] error retrieving user's post data: ${err}`
+      );
+      res.status(500).json({ error: "Failed to retrieve user's post data" });
+    });
 });
 
 router.delete("/:user_id", (req, res) => {
