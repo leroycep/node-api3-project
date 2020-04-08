@@ -46,8 +46,30 @@ router.delete("/:user_id", (req, res) => {
   res.status(500).json({ message: "not yet implemented" });
 });
 
-router.put("/:user_id", (req, res) => {
-  res.status(500).json({ message: "not yet implemented" });
+router.put("/:user_id", validateUser, validateUserId, (req, res) => {
+  db.update(req.user.id, req.body)
+    .then((_records_updated) => {
+      db.getById(req.user.id)
+        .then((updated_user) => {
+          if (updated_user) {
+            res.status(200).json(updated_user);
+          } else {
+            res.status(500).json({ error: "Failed to get updated user" });
+          }
+        })
+        .catch((err) => {
+          console.log(
+            `[${new Date().toISOString()}] error retrieving updated user from db: ${err}`
+          );
+          res.status(500).json({ error: "Failed to retrieve user data" });
+        });
+    })
+    .catch((err) => {
+      console.log(
+        `[${new Date().toISOString()}] error inserting user into db: ${err}`
+      );
+      res.status(500).json({ error: "Failed to add user to database" });
+    });
 });
 
 //custom middleware
