@@ -22,7 +22,16 @@ router.post("/:id/posts", (req, res) => {
 });
 
 router.get("/", (req, res) => {
-  res.status(500).json({ message: "not yet implemented" });
+  db.get()
+    .then((users) => {
+      res.status(200).json(users);
+    })
+    .catch((err) => {
+      console.log(
+        `[${new Date().toISOString()}] error retrieving user data: ${err}`
+      );
+      res.status(500).json({ error: "Failed to retrieve user data" });
+    });
 });
 
 router.get("/:user_id", validateUserId, (req, res) => {
