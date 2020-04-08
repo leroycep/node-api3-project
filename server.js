@@ -7,7 +7,11 @@ server.get('/', (req, res) => {
 });
 
 //custom middleware
+server.use(logger);
 
-function logger(req, res, next) {}
+function logger(req, res, next) {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+    next();
+}
 
 module.exports = server;
