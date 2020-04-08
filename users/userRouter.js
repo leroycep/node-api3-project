@@ -4,8 +4,17 @@ const db = require("./userDb.js");
 
 const router = express.Router();
 
-router.post("/", (req, res) => {
-  res.status(500).json({ message: "not yet implemented" });
+router.post("/", validateUser, (req, res) => {
+  db.insert(req.body)
+    .then((new_user) => {
+      res.status(201).json(new_user);
+    })
+    .catch((err) => {
+      console.log(
+        `[${new Date().toISOString()}] error inserting user into db: ${err}`
+      );
+      res.status(500).json({ error: "Failed to add user to database" });
+    });
 });
 
 router.post("/:id/posts", (req, res) => {
@@ -53,7 +62,15 @@ function validateUserId(req, res, next) {
 }
 
 function validateUser(req, res, next) {
-  // do your magic!
+  if (req.body) {
+    if (req.body.name) {
+      next();
+    } else {
+      res.status(400).json({ error: "missing required field: 'name'" });
+    }
+  } else {
+    res.status(400).json({ error: "missing user data" });
+  }
 }
 
 function validatePost(req, res, next) {
